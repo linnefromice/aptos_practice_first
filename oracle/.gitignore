@@ -147,4 +147,5 @@ dist
 # Built Visual Studio Code Extensions
 *.vsix
 
-
+## Customize
+build
