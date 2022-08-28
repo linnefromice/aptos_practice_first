@@ -45,7 +45,7 @@ const onAggregatorUpdate = (
   const event = new AptosEvent(
     client,
     HexString.ensure(SWITCHBOARD_STATE_ADDRESS),
-    `${SWITCHBOARD_DEVNET_ADDRESS}::Switchboard::State`,
+    `${SWITCHBOARD_DEVNET_ADDRESS}::switch_board::State`,
     "aggregator_update_events",
     pollIntervalMs
   );
@@ -71,6 +71,9 @@ const onAggregatorUpdate = (
 
   await faucetClient.fundAccount(aggregator_acct.address(), 50000);
   await faucetClient.fundAccount(job_acct.address(), 5000);
+
+  console.log(`aggregator_acct account ${aggregator_acct.address().hex()} created + funded.`);
+  console.log(`job_acct account ${job_acct.address().hex()} created + funded.`);
 
   // user will be authority
   await faucetClient.fundAccount(user.address(), 500000);
@@ -160,11 +163,11 @@ const onAggregatorUpdate = (
    *
    */
 
-  const updatePoller = onAggregatorUpdate(client, async (e) => {
-    if (aggregator.address == e.data.aggregator_address) {
-      console.log(`NEW RESULT:`, e.data);
-    }
-  });
+  // const updatePoller = onAggregatorUpdate(client, async (e) => {
+  //   if (aggregator.address == e.data.aggregator_address) {
+  //     console.log(`NEW RESULT:`, e.data);
+  //   }
+  // });
 
   const crank = new Crank(
     client,
