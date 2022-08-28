@@ -510,7 +510,7 @@ export class Aggregator {
       account,
       `${this.devnetAddress}::aggregator_open_round_action::run`,
       [
-        HexString.ensure(this.stateAddress).hex(),
+        // HexString.ensure(this.stateAddress).hex(),
         HexString.ensure(this.address).hex(),
       ],
       [this.coinType]
