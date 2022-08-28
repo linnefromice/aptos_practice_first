@@ -368,7 +368,7 @@ export class State {
     const tx = await sendAptosTx(
       client,
       account,
-      `${devnetAddress}::SwitchboardInitAction::run`,
+      `${devnetAddress}::switchboard_init_action::run`,
       []
     );
 
@@ -379,7 +379,7 @@ export class State {
     return (
       await this.client.getAccountResource(
         this.address,
-        `${this.devnetAddress}::Switchboard::State`
+        `${this.devnetAddress}::switchboard::State`
       )
     ).data;
   }
@@ -398,7 +398,7 @@ export class Aggregator {
     return (
       await this.client.getAccountResource(
         HexString.ensure(this.address).hex(),
-        `${this.devnetAddress}::Aggregator::Aggregator`
+        `${this.devnetAddress}::aggregator::Aggregator`
       )
     ).data;
   }
@@ -432,21 +432,21 @@ export class Aggregator {
     const tx = await sendAptosTx(
       client,
       account,
-      `${devnetAddress}::AggregatorInitAction::run`,
+      `${devnetAddress}::aggregator_init_action::run`,
       [
-        HexString.ensure(stateAddress).hex(),
+        // HexString.ensure(stateAddress).hex(),
         Buffer.from(params.name ?? "").toString("hex"),
         Buffer.from(params.metadata ?? "").toString("hex"),
         HexString.ensure(params.queueAddress).hex(),
-        params.batchSize.toString(),
-        params.minOracleResults.toString(),
-        params.minJobResults.toString(),
-        params.minUpdateDelaySeconds.toString(),
-        (params.startAfter ?? 0).toString(),
-        (params.varianceThreshold ?? 0).toString(),
+        params.batchSize,
+        params.minOracleResults,
+        params.minJobResults,
+        params.minUpdateDelaySeconds,
+        (params.startAfter ?? 0),
+        (params.varianceThreshold ?? 0),
         params.varianceThresholdScale ?? 0,
-        (params.forceReportPeriod ?? 0).toString(),
-        (params.expiration ?? 0).toString(),
+        (params.forceReportPeriod ?? 0),
+        (params.expiration ?? 0),
         HexString.ensure(params.authority).hex(),
       ],
       [params.coinType ?? "0x1::aptos_coin::AptosCoin"]
@@ -471,9 +471,9 @@ export class Aggregator {
     return await sendAptosTx(
       this.client,
       account,
-      `${this.devnetAddress}::AggregatorAddJobAction::run`,
+      `${this.devnetAddress}::aggregator_add_job_action::run`,
       [
-        HexString.ensure(this.stateAddress).hex(),
+        // HexString.ensure(this.stateAddress).hex(),
         HexString.ensure(this.address).hex(),
         HexString.ensure(params.job).hex(),
         params.weight || 1,
@@ -488,7 +488,7 @@ export class Aggregator {
     return await sendAptosTx(
       this.client,
       account,
-      `${this.devnetAddress}::AggregatorSaveResultAction::run`,
+      `${this.devnetAddress}::aggregator_save_result_action::run`,
       [
         HexString.ensure(this.stateAddress).hex(),
         HexString.ensure(params.oracle_address).hex(),
@@ -508,7 +508,7 @@ export class Aggregator {
     return await sendAptosTx(
       this.client,
       account,
-      `${this.devnetAddress}::AggregatorOpenRoundAction::run`,
+      `${this.devnetAddress}::aggregator_open_round_action::run`,
       [
         HexString.ensure(this.stateAddress).hex(),
         HexString.ensure(this.address).hex(),
@@ -520,8 +520,8 @@ export class Aggregator {
   async watch(callback: EventCallback): Promise<AptosEvent> {
     const event = new AptosEvent(
       this.client,
-      HexString.ensure(`${this.devnetAddress}::Switchboard::State`),
-      `${this.devnetAddress}::Switchboard::State`,
+      HexString.ensure(`${this.devnetAddress}::switchboard::State`),
+      `${this.devnetAddress}::switchboard::State`,
       "aggregator_update_events",
       1000
     );
@@ -585,7 +585,7 @@ export class Job {
     return (
       await this.client.getAccountResource(
         this.address,
-        `${this.devnetAddress}::Job::Job`
+        `${this.devnetAddress}::job::Job`
       )
     ).data;
   }
@@ -613,9 +613,9 @@ export class Job {
     const tx = await sendAptosTx(
       client,
       account,
-      `${devnetAddress}::JobInitAction::run`,
+      `${devnetAddress}::job_init_action::run`,
       [
-        HexString.ensure(stateAddress).hex(),
+        // HexString.ensure(stateAddress).hex(),
         stringToHex(params.name),
         stringToHex(params.metadata),
         HexString.ensure(params.authority).hex(),
@@ -655,7 +655,7 @@ export class Crank {
     const tx = await sendAptosTx(
       client,
       account,
-      `${devnetAddress}::CrankInitAction::run`,
+      `${devnetAddress}::crank_init_action::run`,
       [
         HexString.ensure(stateAddress).hex(),
         HexString.ensure(params.queueAddress).hex(),
@@ -683,9 +683,9 @@ export class Crank {
     return await sendAptosTx(
       this.client,
       account,
-      `${this.devnetAddress}::CrankPushAction::run`,
+      `${this.devnetAddress}::crank_push_action::run`,
       [
-        HexString.ensure(this.stateAddress).hex(),
+        // HexString.ensure(this.stateAddress).hex(),
         HexString.ensure(this.address).hex(),
         HexString.ensure(params.aggregatorAddress).hex(),
       ],
@@ -700,7 +700,7 @@ export class Crank {
     return await sendAptosTx(
       this.client,
       account,
-      `${this.devnetAddress}::CrankPopAction::run`,
+      `${this.devnetAddress}::crank_pop_action::run`,
       [
         HexString.ensure(this.stateAddress).hex(),
         HexString.ensure(this.address).hex(),
@@ -713,7 +713,7 @@ export class Crank {
     return (
       await this.client.getAccountResource(
         HexString.ensure(this.address).hex(),
-        `${this.devnetAddress}::Crank::Crank`
+        `${this.devnetAddress}::crank::Crank`
       )
     ).data;
   }
@@ -744,7 +744,7 @@ export class Oracle {
     const tx = await sendAptosTx(
       client,
       account,
-      `${devnetAddress}::OracleInitAction::run`,
+      `${devnetAddress}::oracle_init_action::run`,
       [
         HexString.ensure(stateAddress).hex(),
         stringToHex(params.name),
@@ -771,7 +771,7 @@ export class Oracle {
     return (
       await this.client.getAccountResource(
         HexString.ensure(this.address).hex(),
-        `${this.devnetAddress}::Oracle::Oracle`
+        `${this.devnetAddress}::oracle::Oracle`
       )
     ).data;
   }
@@ -783,7 +783,7 @@ export class Oracle {
     return await sendAptosTx(
       this.client,
       account,
-      `${this.devnetAddress}::OracleHeartbeatAction::run`,
+      `${this.devnetAddress}::oracle_heartbeat_action::run`,
       [
         HexString.ensure(this.stateAddress).hex(),
         HexString.ensure(this.address).hex(),
@@ -818,7 +818,7 @@ export class OracleQueue {
     const tx = await sendAptosTx(
       client,
       account,
-      `${devnetAddress}::OracleQueueInitAction::run`,
+      `${devnetAddress}::oracle_queue_init_action::run`,
       [
         HexString.ensure(stateAddress).hex(),
         stringToHex(params.name),
@@ -859,7 +859,7 @@ export class OracleQueue {
     return (
       await this.client.getAccountResource(
         HexString.ensure(this.address).hex(),
-        `${this.devnetAddress}::OracleQueue::OracleQueue<${this.coinType}>`
+        `${this.devnetAddress}::oracle_queue::OracleQueue<${this.coinType}>`
       )
     ).data;
   }
@@ -890,12 +890,12 @@ export class Lease {
     const tx = await sendAptosTx(
       client,
       account,
-      `${devnetAddress}::LeaseInitAction::run`,
+      `${devnetAddress}::lease_init_action::run`,
       [
-        HexString.ensure(stateAddress).hex(),
+        // HexString.ensure(stateAddress).hex(),
         HexString.ensure(params.queueAddress).hex(),
         HexString.ensure(params.withdrawAuthority).hex(),
-        params.initialAmount.toString(),
+        params.initialAmount,
       ],
       [params.coinType ?? "0x1::aptos_coin::AptosCoin"]
     );
@@ -923,7 +923,7 @@ export class Lease {
     return await sendAptosTx(
       this.client,
       account,
-      `${this.devnetAddress}::LeaseExtendAction::run`,
+      `${this.devnetAddress}::lease_extend_action::run`,
       [HexString.ensure(this.address).hex(), params.loadAmount.toString()],
       [this.coinType]
     );
@@ -939,7 +939,7 @@ export class Lease {
     return await sendAptosTx(
       this.client,
       account,
-      `${this.devnetAddress}::LeaseWithdrawAction::run`,
+      `${this.devnetAddress}::lease_withdraw_action::run`,
       [[HexString.ensure(this.address).hex(), params.amount.toString()]],
       [this.coinType]
     );
@@ -949,7 +949,7 @@ export class Lease {
     return (
       await this.client.getAccountResource(
         HexString.ensure(this.address).hex(),
-        `${this.devnetAddress}::Lease::Lease<${this.coinType}>`
+        `${this.devnetAddress}::lease::Lease<${this.coinType}>`
       )
     ).data;
   }
@@ -980,7 +980,7 @@ export class OracleWallet {
     const tx = await sendAptosTx(
       client,
       account,
-      `${devnetAddress}::OracleWalletInitAction::run`,
+      `${devnetAddress}::oracle_wallet_init_action::run`,
       [HexString.ensure(params.oracleAddress).hex()],
       [params.coinType ?? "0x1::aptos_coin::AptosCoin"]
     );
@@ -1008,7 +1008,7 @@ export class OracleWallet {
     return await sendAptosTx(
       this.client,
       account,
-      `${this.devnetAddress}::OracleWalletContributeAction::run`,
+      `${this.devnetAddress}::oracle_wallet_contribute_action::run`,
       [HexString.ensure(this.address).hex(), params.loadAmount.toString()],
       [this.coinType]
     );
@@ -1024,7 +1024,7 @@ export class OracleWallet {
     return await sendAptosTx(
       this.client,
       account,
-      `${this.devnetAddress}::OracleWalletWithdrawAction::run`,
+      `${this.devnetAddress}::oracle_wallet_withdraw_action::run`,
       [[HexString.ensure(this.address).hex(), params.amount.toString()]],
       [this.coinType]
     );
@@ -1034,7 +1034,7 @@ export class OracleWallet {
     return (
       await this.client.getAccountResource(
         HexString.ensure(this.address).hex(),
-        `${this.devnetAddress}::OracleWallet::OracleWallet<${this.coinType}>`
+        `${this.devnetAddress}::oracle_wallet::OracleWallet<${this.coinType}>`
       )
     ).data;
   }
@@ -1064,7 +1064,7 @@ export class Permission {
     const tx = await sendAptosTx(
       client,
       account,
-      `${devnetAddress}::PermissionInitAction::run`,
+      `${devnetAddress}::permission_init_action::run`,
       [
         HexString.ensure(stateAddress).hex(),
         HexString.ensure(params.authority).hex(),
@@ -1090,7 +1090,7 @@ export class Permission {
     return await sendAptosTx(
       this.client,
       account,
-      `${this.devnetAddress}::PermissionSetAction::run`,
+      `${this.devnetAddress}::permission_set_action::run`,
       [
         HexString.ensure(stateAddress).hex(),
         HexString.ensure(params.authority).hex(),
@@ -1106,7 +1106,7 @@ export class Permission {
     return (
       await this.client.getAccountResource(
         HexString.ensure(this.address).hex(),
-        `${this.devnetAddress}::Permission::Permission`
+        `${this.devnetAddress}::permission::Permission`
       )
     ).data;
   }
