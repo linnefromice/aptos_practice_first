@@ -1,0 +1,9 @@
+{
+  "name": "oracle",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@switchboard-xyz/aptos.js": "^2.0.8"
+  }
+}
