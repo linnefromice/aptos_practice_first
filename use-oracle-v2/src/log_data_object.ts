@@ -5,8 +5,8 @@ import { AggregatorAccount, LeaseAccount } from '@switchboard-xyz/aptos.js';
 const parsed = dotenv.config().parsed
 if (!parsed) throw new Error("not parsed from dotenv")
 const NODE_URL = parsed["NODE_URL"];
-const FAUCET_URL = parsed["FAUCET_URL"];
 const SWITCHBOARD_DEVNET_ADDRESS = parsed["SWITCHBOARD_DEVNET_ADDRESS"]
+const SWITCHBOARD_QUEUE_ADDRESS = parsed["SWITCHBOARD_QUEUE_ADDRESS"]
 
 const main = async () => {
   const client = new AptosClient(NODE_URL);
@@ -24,7 +24,7 @@ const main = async () => {
       client,
       aggregator.address,
       SWITCHBOARD_DEVNET_ADDRESS
-    ).loadData()
+    ).loadData(SWITCHBOARD_QUEUE_ADDRESS)
   );
   console.log("Load aggregator jobs data", JSON.stringify(await aggregator.loadJobs()));
 }

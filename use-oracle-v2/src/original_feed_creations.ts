@@ -67,7 +67,7 @@ const generateAggregatorWithJob = async ({
       minUpdateDelaySeconds: 5,
       varianceThreshold: new Big(0),
       coinType: "0x1::aptos_coin::AptosCoin",
-      crank: SWITCHBOARD_CRANK_ADDRESS,
+      crankAddress: SWITCHBOARD_CRANK_ADDRESS,
       initialLoadAmount: 1000,
       jobs: [
         {
@@ -97,7 +97,7 @@ const generateAggregatorWithJob = async ({
        client,
        aggregator.address,
        SWITCHBOARD_DEVNET_ADDRESS
-     ).loadData()
+     ).loadData(SWITCHBOARD_DEVNET_ADDRESS)
    );
    console.log("Load aggregator jobs data", JSON.stringify(await aggregator.loadJobs()));
 }
