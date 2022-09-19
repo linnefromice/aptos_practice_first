@@ -79,7 +79,7 @@ const generateAggregatorWithJob = async ({
           name: name,
           metadata: metadata,
           authority: user.address().hex(),
-          data: serializedJob.toString(),
+          data: serializedJob.toString("base64"),
           weight: 1,
         },
       ],
