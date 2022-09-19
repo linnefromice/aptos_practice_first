@@ -1,3 +1,12 @@
+import dotenv from 'dotenv'
+const parsed = dotenv.config().parsed
+if (!parsed) throw new Error("not parsed from dotenv")
+const NODE_URL = parsed["NODE_URL"];
+const FAUCET_URL = parsed["FAUCET_URL"];
+const SWITCHBOARD_DEVNET_ADDRESS = parsed["SWITCHBOARD_DEVNET_ADDRESS"]
+const SWITCHBOARD_QUEUE_ADDRESS = parsed["SWITCHBOARD_QUEUE_ADDRESS"]
+const SWITCHBOARD_CRANK_ADDRESS = parsed["SWITCHBOARD_CRANK_ADDRESS"]
+
 import { Buffer } from "buffer";
 import { AptosClient, AptosAccount, FaucetClient } from "aptos";
 import {
@@ -6,18 +15,6 @@ import {
   createFeed,
 } from "@switchboard-xyz/aptos.js";
 import Big from "big.js";
-
-const NODE_URL = "https://fullnode.devnet.aptoslabs.com/v1";
-const FAUCET_URL = "https://faucet.devnet.aptoslabs.com";
-
-const SWITCHBOARD_DEVNET_ADDRESS =
-  "0x14611263909398572be034debb2e61b6751cafbeaddd994b9a1250cb76b99d38";
-
-const SWITCHBOARD_QUEUE_ADDRESS =
-  "0x14611263909398572be034debb2e61b6751cafbeaddd994b9a1250cb76b99d38";
-
-const SWITCHBOARD_CRANK_ADDRESS =
-  "0x14611263909398572be034debb2e61b6751cafbeaddd994b9a1250cb76b99d38";
 
 // example
 // url: "https://www.binance.us/api/v3/ticker/price?symbol=BTCUSD"
