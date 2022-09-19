@@ -1,12 +1,5 @@
+import path from 'path'
 import dotenv from 'dotenv'
-const parsed = dotenv.config().parsed
-if (!parsed) throw new Error("not parsed from dotenv")
-const NODE_URL = parsed["NODE_URL"];
-const FAUCET_URL = parsed["FAUCET_URL"];
-const SWITCHBOARD_DEVNET_ADDRESS = parsed["SWITCHBOARD_DEVNET_ADDRESS"]
-const SWITCHBOARD_QUEUE_ADDRESS = parsed["SWITCHBOARD_QUEUE_ADDRESS"]
-const SWITCHBOARD_CRANK_ADDRESS = parsed["SWITCHBOARD_CRANK_ADDRESS"]
-
 import { Buffer } from "buffer";
 import { AptosClient, AptosAccount, FaucetClient } from "aptos";
 import {
@@ -15,6 +8,18 @@ import {
   createFeed,
 } from "@switchboard-xyz/aptos.js";
 import Big from "big.js";
+
+// load envs
+const envName = process.env.ENV_NAME
+if (!envName) throw new Error("[ERROR] Need ENV_NAME")
+const ENV_PATH = path.join(process.cwd(), `.${envName}.env`);
+const parsed = dotenv.config({ path: ENV_PATH }).parsed
+if (!parsed) throw new Error("[ERROR] donot parse from dotenv")
+const NODE_URL = parsed["NODE_URL"];
+const FAUCET_URL = parsed["FAUCET_URL"];
+const SWITCHBOARD_DEVNET_ADDRESS = parsed["SWITCHBOARD_DEVNET_ADDRESS"]
+const SWITCHBOARD_QUEUE_ADDRESS = parsed["SWITCHBOARD_QUEUE_ADDRESS"]
+const SWITCHBOARD_CRANK_ADDRESS = parsed["SWITCHBOARD_CRANK_ADDRESS"]
 
 // example
 // url: "https://www.binance.us/api/v3/ticker/price?symbol=BTCUSD"

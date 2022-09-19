@@ -17,7 +17,9 @@
     "fix": "gts fix",
     "prepare": "npm run compile",
     "pretest": "npm run compile",
-    "posttest": "npm run lint"
+    "posttest": "npm run lint",
+    "ts-node:devnet": "ENV_NAME=devnet yarn ts-node",
+    "ts-node:testnet": "ENV_NAME=testnet yarn ts-node"
   },
   "devDependencies": {
     "@types/node": "^14.11.2",

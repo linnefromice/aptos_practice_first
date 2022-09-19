@@ -1,18 +1,26 @@
+import path from 'path'
 import dotenv from 'dotenv'
 import { AptosClient } from "aptos";
 import { AggregatorAccount, LeaseAccount } from '@switchboard-xyz/aptos.js';
 
-const parsed = dotenv.config().parsed
-if (!parsed) throw new Error("not parsed from dotenv")
-const NODE_URL = parsed["NODE_URL"];
-const SWITCHBOARD_DEVNET_ADDRESS = parsed["SWITCHBOARD_DEVNET_ADDRESS"]
-const SWITCHBOARD_QUEUE_ADDRESS = parsed["SWITCHBOARD_QUEUE_ADDRESS"]
+// load envs
+const envName = process.env.ENV_NAME
+if (!envName) throw new Error("[ERROR] Need ENV_NAME")
+const ENV_PATH = path.join(process.cwd(), `.${envName}.env`);
+const parsed = dotenv.config({ path: ENV_PATH }).parsed
+if (!parsed) throw new Error("[ERROR] donot parse from dotenv")
 
-const main = async () => {
+const NODE_URL = parsed["NODE_URL"];
+const SWITCHBOARD_DEVNET_ADDRESS = parsed["SWITCHBOARD_DEVNET_ADDRESS"];
+const SWITCHBOARD_QUEUE_ADDRESS = parsed["SWITCHBOARD_QUEUE_ADDRESS"];
+
+const AGGREGATOR_ACCOUNT = "0x6973a4350224669214a9a5c6d46074b55f1e98831e439d8d760d6bc9360875d7"; // temp
+
+(async () => {
   const client = new AptosClient(NODE_URL);
   const aggregator = new AggregatorAccount(
     client,
-    "0x6973a4350224669214a9a5c6d46074b55f1e98831e439d8d760d6bc9360875d7",
+    AGGREGATOR_ACCOUNT,
     SWITCHBOARD_DEVNET_ADDRESS
   )
 
@@ -27,6 +35,4 @@ const main = async () => {
     ).loadData(SWITCHBOARD_QUEUE_ADDRESS)
   );
   console.log("Load aggregator jobs data", JSON.stringify(await aggregator.loadJobs()));
-}
-
-main().then(_ => console.log("SUCCESS")).catch(_ => console.log("FAILURE"))
+})();
