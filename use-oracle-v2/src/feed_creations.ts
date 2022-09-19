@@ -17,7 +17,7 @@ const parsed = dotenv.config({ path: ENV_PATH }).parsed
 if (!parsed) throw new Error("[ERROR] donot parse from dotenv")
 const NODE_URL = parsed["NODE_URL"];
 const FAUCET_URL = parsed["FAUCET_URL"];
-const SWITCHBOARD_DEVNET_ADDRESS = parsed["SWITCHBOARD_DEVNET_ADDRESS"]
+const SWITCHBOARD_ADDRESS = parsed["SWITCHBOARD_ADDRESS"]
 const SWITCHBOARD_QUEUE_ADDRESS = parsed["SWITCHBOARD_QUEUE_ADDRESS"]
 const SWITCHBOARD_CRANK_ADDRESS = parsed["SWITCHBOARD_CRANK_ADDRESS"]
 
@@ -84,7 +84,7 @@ const generateAggregatorWithJob = async ({
         },
       ],
     },
-    SWITCHBOARD_DEVNET_ADDRESS
+    SWITCHBOARD_ADDRESS
   );
 
   console.log(
@@ -101,13 +101,13 @@ const generateAggregatorWithJob = async ({
      await new LeaseAccount(
        client,
        aggregator.address,
-       SWITCHBOARD_DEVNET_ADDRESS
-     ).loadData(SWITCHBOARD_DEVNET_ADDRESS)
+       SWITCHBOARD_ADDRESS
+     ).loadData(SWITCHBOARD_QUEUE_ADDRESS)
    );
    console.log("Load aggregator jobs data", JSON.stringify(await aggregator.loadJobs()));
 }
 
-const main = async () => {
+(async () => {
   const faucetClient = new FaucetClient(NODE_URL, FAUCET_URL);
 
   // create new user
@@ -157,6 +157,4 @@ const main = async () => {
   //   name: "ETH/USD (by coingecko)",
   //   metadata: "coingecko"
   // })
-}
-
-main().then(_ => console.log("SUCCESS")).catch(_ => console.log("FAILURE"))
+})();
