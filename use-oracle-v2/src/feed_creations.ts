@@ -1,3 +1,5 @@
+import path from 'path'
+import dotenv from 'dotenv'
 import { Buffer } from "buffer";
 import { AptosClient, AptosAccount, FaucetClient } from "aptos";
 import {
@@ -7,17 +9,17 @@ import {
 } from "@switchboard-xyz/aptos.js";
 import Big from "big.js";
 
-const NODE_URL = "https://fullnode.devnet.aptoslabs.com/v1";
-const FAUCET_URL = "https://faucet.devnet.aptoslabs.com";
-
-const SWITCHBOARD_DEVNET_ADDRESS =
-  "0x14611263909398572be034debb2e61b6751cafbeaddd994b9a1250cb76b99d38";
-
-const SWITCHBOARD_QUEUE_ADDRESS =
-  "0x14611263909398572be034debb2e61b6751cafbeaddd994b9a1250cb76b99d38";
-
-const SWITCHBOARD_CRANK_ADDRESS =
-  "0x14611263909398572be034debb2e61b6751cafbeaddd994b9a1250cb76b99d38";
+// load envs
+const envName = process.env.ENV_NAME
+if (!envName) throw new Error("[ERROR] Need ENV_NAME")
+const ENV_PATH = path.join(process.cwd(), `.${envName}.env`);
+const parsed = dotenv.config({ path: ENV_PATH }).parsed
+if (!parsed) throw new Error("[ERROR] donot parse from dotenv")
+const NODE_URL = parsed["NODE_URL"];
+const FAUCET_URL = parsed["FAUCET_URL"];
+const SWITCHBOARD_ADDRESS = parsed["SWITCHBOARD_ADDRESS"]
+const SWITCHBOARD_QUEUE_ADDRESS = parsed["SWITCHBOARD_QUEUE_ADDRESS"]
+const SWITCHBOARD_CRANK_ADDRESS = parsed["SWITCHBOARD_CRANK_ADDRESS"]
 
 // example
 // url: "https://www.binance.us/api/v3/ticker/price?symbol=BTCUSD"
@@ -70,19 +72,19 @@ const generateAggregatorWithJob = async ({
       minUpdateDelaySeconds: 5,
       varianceThreshold: new Big(0),
       coinType: "0x1::aptos_coin::AptosCoin",
-      crank: SWITCHBOARD_CRANK_ADDRESS,
+      crankAddress: SWITCHBOARD_CRANK_ADDRESS,
       initialLoadAmount: 1000,
       jobs: [
         {
           name: name,
           metadata: metadata,
           authority: user.address().hex(),
-          data: serializedJob.toString(),
+          data: serializedJob.toString("base64"),
           weight: 1,
         },
       ],
     },
-    SWITCHBOARD_DEVNET_ADDRESS
+    SWITCHBOARD_ADDRESS
   );
 
   console.log(
@@ -99,13 +101,17 @@ const generateAggregatorWithJob = async ({
      await new LeaseAccount(
        client,
        aggregator.address,
-       SWITCHBOARD_DEVNET_ADDRESS
-     ).loadData()
+       SWITCHBOARD_ADDRESS
+     ).loadData(SWITCHBOARD_QUEUE_ADDRESS)
    );
    console.log("Load aggregator jobs data", JSON.stringify(await aggregator.loadJobs()));
+
+   console.log(`aggregator holder: ${user.address()}`)
+   console.log(`aggregator: ${aggregator.address}`)
+   console.log({ url, path, name, metadata })
 }
 
-const main = async () => {
+(async () => {
   const faucetClient = new FaucetClient(NODE_URL, FAUCET_URL);
 
   // create new user
@@ -155,6 +161,4 @@ const main = async () => {
   //   name: "ETH/USD (by coingecko)",
   //   metadata: "coingecko"
   // })
-}
-
-main().then(_ => console.log("SUCCESS")).catch(_ => console.log("FAILURE"))
+})();
