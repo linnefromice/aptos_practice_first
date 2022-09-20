@@ -105,6 +105,10 @@ const generateAggregatorWithJob = async ({
      ).loadData(SWITCHBOARD_QUEUE_ADDRESS)
    );
    console.log("Load aggregator jobs data", JSON.stringify(await aggregator.loadJobs()));
+
+   console.log(`aggregator holder: ${user.address()}`)
+   console.log(`aggregator: ${aggregator.address}`)
+   console.log({ url, path, name, metadata })
 }
 
 (async () => {
