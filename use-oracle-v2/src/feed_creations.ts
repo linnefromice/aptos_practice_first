@@ -20,20 +20,13 @@ const FAUCET_URL = parsed["FAUCET_URL"];
 const SWITCHBOARD_ADDRESS = parsed["SWITCHBOARD_ADDRESS"]
 const SWITCHBOARD_QUEUE_ADDRESS = parsed["SWITCHBOARD_QUEUE_ADDRESS"]
 const SWITCHBOARD_CRANK_ADDRESS = parsed["SWITCHBOARD_CRANK_ADDRESS"]
-
-// example
-// url: "https://www.binance.us/api/v3/ticker/price?symbol=BTCUSD"
-// path: "$.price"
-// name: "BTC/USD"
-// metadata: "binance"
 const generateAggregatorWithJob = async ({
-  user, url, path, name, metadata
+  user, name, metadata, tasks
 }: {
   user: AptosAccount,
-  url: string,
-  path: string,
   name: string,
-  metadata: string
+  metadata: string,
+  tasks: OracleJob.Task[]
 }) => {
   const client = new AptosClient(NODE_URL);
   const faucetClient = new FaucetClient(NODE_URL, FAUCET_URL);
@@ -44,18 +37,7 @@ const generateAggregatorWithJob = async ({
   const serializedJob = Buffer.from(
     OracleJob.encodeDelimited(
       OracleJob.create({
-        tasks: [
-          {
-            httpTask: {
-              url: url,
-            },
-          },
-          {
-            jsonParseTask: {
-              path: path,
-            },
-          },
-        ],
+        tasks,
       })
     ).finish()
   );
@@ -87,6 +69,8 @@ const generateAggregatorWithJob = async ({
     SWITCHBOARD_ADDRESS
   );
 
+  console.log(`name: ${name}`)
+  console.log(`metadata: ${metadata}`)
   console.log(
     `Created Aggregator and Lease resources at account address ${aggregator.address}. Tx hash ${createFeedTx}`
   );
@@ -108,7 +92,8 @@ const generateAggregatorWithJob = async ({
 
    console.log(`aggregator holder: ${user.address()}`)
    console.log(`aggregator: ${aggregator.address}`)
-   console.log({ url, path, name, metadata })
+   console.log({ name, metadata })
+   console.dir(tasks, { depth: null });
 }
 
 (async () => {
@@ -121,44 +106,104 @@ const generateAggregatorWithJob = async ({
 
   await generateAggregatorWithJob({
     user,
-    url: "https://www.binance.us/api/v3/ticker/price?symbol=BTCUSD",
-    path: "$.price",
     name: "BTC/USD (by binance)",
-    metadata: "binance"
+    metadata: "binance",
+    tasks: [
+      OracleJob.Task.create({
+        httpTask: {
+          url: "https://www.binance.us/api/v3/ticker/price?symbol=BTCUSD",
+        },
+      }),
+      OracleJob.Task.create({
+        jsonParseTask: {
+          path: "$.price",
+        },
+      }),
+    ]
   })
   // await generateAggregatorWithJob({
   //   user,
-  //   url: "https://www.binance.us/api/v3/ticker/price?symbol=ETHUSD",
-  //   path: "$.price",
   //   name: "ETH/USD (by binance)",
-  //   metadata: "binance"
+  //   metadata: "binance",
+  //   tasks: [
+  //     OracleJob.Task.create({
+  //       httpTask: {
+  //         url: "https://www.binance.us/api/v3/ticker/price?symbol=ETHUSD",
+  //       },
+  //     }),
+  //     OracleJob.Task.create({
+  //       jsonParseTask: {
+  //         path: "$.price",
+  //       },
+  //     }),
+  //   ]
   // })
   // await generateAggregatorWithJob({
   //   user,
-  //   url: "https://www.binance.us/api/v3/ticker/price?symbol=USDCUSD",
-  //   path: "$.price",
   //   name: "USDC/USD (by binance)",
-  //   metadata: "binance"
+  //   metadata: "binance",
+  //   tasks: [
+  //     OracleJob.Task.create({
+  //       httpTask: {
+  //         url: "https://www.binance.us/api/v3/ticker/price?symbol=USDCUSD",
+  //       },
+  //     }),
+  //     OracleJob.Task.create({
+  //       jsonParseTask: {
+  //         path: "$.price",
+  //       },
+  //     }),
+  //   ]
   // })
   // await generateAggregatorWithJob({
   //   user,
-  //   url: "https://www.binance.us/api/v3/ticker/price?symbol=USDTUSD",
-  //   path: "$.price",
   //   name: "USDT/USD (by binance)",
-  //   metadata: "binance"
+  //   metadata: "binance",
+  //   tasks: [
+  //     OracleJob.Task.create({
+  //       httpTask: {
+  //         url: "https://www.binance.us/api/v3/ticker/price?symbol=USDTUSD",
+  //       },
+  //     }),
+  //     OracleJob.Task.create({
+  //       jsonParseTask: {
+  //         path: "$.price",
+  //       },
+  //     }),
+  //   ]
   // })
   // await generateAggregatorWithJob({
   //   user,
-  //   url: "https://www.binance.us/api/v3/ticker/price?symbol=UNIUSD",
-  //   path: "$.price",
   //   name: "UNI/USD (by binance)",
-  //   metadata: "binance"
+  //   metadata: "binance",
+  //   tasks: [
+  //     OracleJob.Task.create({
+  //       httpTask: {
+  //         url: "https://www.binance.us/api/v3/ticker/price?symbol=UNIUSD",
+  //       },
+  //     }),
+  //     OracleJob.Task.create({
+  //       jsonParseTask: {
+  //         path: "$.price",
+  //       },
+  //     }),
+  //   ]
   // })
   // await generateAggregatorWithJob({
   //   user,
-  //   url: "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=USD",
-  //   path: "$.ethereum.usd",
   //   name: "ETH/USD (by coingecko)",
-  //   metadata: "coingecko"
+  //   metadata: "coingecko",
+  //   tasks: [
+  //     OracleJob.Task.create({
+  //       httpTask: {
+  //         url: "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=USD",
+  //       },
+  //     }),
+  //     OracleJob.Task.create({
+  //       jsonParseTask: {
+  //         path: "$.ethereum.usd",
+  //       },
+  //     }),
+  //   ]
   // })
 })();
