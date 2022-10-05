@@ -1,0 +1,9 @@
+[package]
+name = 'UseOracleInContract'
+version = '0.1.0'
+upgrade_policy = "compatible"
+
+[dependencies.AptosFramework]
+git = 'https://github.com/aptos-labs/aptos-core.git'
+rev = 'devnet'
+subdir = 'aptos-move/framework/aptos-framework'
