@@ -7,3 +7,12 @@ upgrade_policy = "compatible"
 git = 'https://github.com/aptos-labs/aptos-core.git'
 rev = 'devnet'
 subdir = 'aptos-move/framework/aptos-framework'
+
+[dependencies.Switchboard]
+git = 'https://github.com/switchboard-xyz/sbv2-aptos.git'
+rev = 'main'
+subdir = 'switchboard-move/switchboard/'
+
+[addresses]
+use_oracle="0xAAAAAAAA"
+switchboard = "0xc9b4bb0b1f7a343687c4f8bc6eea36dd2a3aa8d654e640050ab5b8635a6b9cbd" # devnet and testnet
