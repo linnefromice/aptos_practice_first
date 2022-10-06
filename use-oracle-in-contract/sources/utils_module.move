@@ -20,4 +20,7 @@ module use_oracle::utils_module {
     public fun assert_owner(account: address) {
         assert!(is_owner(account),error::invalid_argument(ENOT_OWNER));
     }
+
+    #[test_only]
+    struct WETH {}
 }
