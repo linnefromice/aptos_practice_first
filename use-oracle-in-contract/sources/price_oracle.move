@@ -11,6 +11,7 @@ module use_oracle::price_oracle {
     const EALREADY_INITIALIZED: u64 = 2;
     const ENOT_REGISTERED: u64 = 3;
     const EALREADY_REGISTERED: u64 = 4;
+    const EINACTIVE: u64 = 5;
 
     const INACTIVE: u8 = 0;
     const FIXED_PRICE: u8 = 1;
@@ -84,6 +85,24 @@ module use_oracle::price_oracle {
         assert!(is_registered(key), error::invalid_argument(ENOT_REGISTERED));
         let oracle_ref = simple_map::borrow_mut(&mut borrow_global_mut<Storage>(owner_addr).oracles, &key);
         oracle_ref.fixed_price = PriceDecimal { value, dec, neg };
+    }
+
+
+    ////////////////////////////////////////////////////
+    /// Feed
+    ////////////////////////////////////////////////////
+    public fun price<C>(): (u128, u8) acquires Storage {
+        price_internal(key<C>())
+    }
+    public fun price_of(key: String): (u128, u8) acquires Storage {
+        price_internal(key)
+    }
+    fun price_internal(key: String): (u128, u8) acquires Storage {
+        assert!(is_registered(key), error::invalid_argument(ENOT_REGISTERED));
+        let oracle = simple_map::borrow(&borrow_global<Storage>(utils_module::owner_address()).oracles, &key);
+        if (oracle.mode == FIXED_PRICE) return (oracle.fixed_price.value, oracle.fixed_price.dec);
+        // if (oracle.mode == SWITCHBOARD) (0, 0) // TODO
+        abort error::invalid_argument(EINACTIVE)
     }
 
     #[test_only]
