@@ -3,8 +3,8 @@ ENV_NAME="testnet" # devnet
 URL="fullnode.testnet.aptoslabs.com/v1"
 ACCOUNT_ADDRESS="0x790e386260446eeea471da8050103df2b1cbb884a8a120478e04b8c9ff253f2"
 RESOURCE_ADDRESS="0xb27f7bbf7caf2368b08032d005e8beab151a885054cdca55c4cc644f0a308d2b"
-LOOP_COUNT=10
-DURATION=5 # per seconds
+LOOP_COUNT=1
+DURATION=1 # per seconds
 
 # main
 i=0
