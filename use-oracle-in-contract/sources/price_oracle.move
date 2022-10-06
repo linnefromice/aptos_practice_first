@@ -1,10 +1,16 @@
 module use_oracle::price_oracle {
+    use std::error;
     use std::signer;
     use std::string::String;
     use aptos_std::simple_map;
     use use_oracle::utils_module::{Self, key};
     use switchboard::aggregator;
     use switchboard::math;
+
+    const ENOT_INITIALIZED: u64 = 1;
+    const EALREADY_INITIALIZED: u64 = 2;
+    const ENOT_REGISTERED: u64 = 3;
+    const EALREADY_REGISTERED: u64 = 4;
 
     const INACTIVE: u8 = 0;
     const FIXED_PRICE: u8 = 1;
@@ -24,7 +30,9 @@ module use_oracle::price_oracle {
     /// Manage module
     ////////////////////////////////////////////////////
     public entry fun initialize(owner: &signer) {
+        let owner_addr = signer::address_of(owner);
         utils_module::assert_owner(signer::address_of(owner));
+        assert!(!exists<Storage>(owner_addr), error::invalid_argument(EALREADY_INITIALIZED));
         move_to(owner, Storage { oracles: simple_map::create<String, OracleContainer>() });
     }
 
@@ -45,21 +53,36 @@ module use_oracle::price_oracle {
     fun add_oracle(owner: &signer, key: String, oracle: OracleContainer) acquires Storage {
         let owner_addr = signer::address_of(owner);
         utils_module::assert_owner(owner_addr);
+        assert!(exists<Storage>(owner_addr), error::invalid_argument(ENOT_INITIALIZED));
+        assert!(!is_registered(key), error::invalid_argument(EALREADY_REGISTERED));
         let storage = borrow_global_mut<Storage>(owner_addr);
         simple_map::add<String, OracleContainer>(&mut storage.oracles, key, oracle);
+    }
+    fun is_registered(key: String): bool acquires Storage {
+        let storage_ref = borrow_global<Storage>(utils_module::owner_address());
+        is_registered_internal(key, storage_ref)
+    }
+    fun is_registered_internal(key: String, storage: &Storage): bool {
+        simple_map::contains_key(&storage.oracles, &key)
     }
 
     public entry fun change_mode<C>(owner: &signer, new_mode: u8) acquires Storage {
         let owner_addr = signer::address_of(owner);
+        let key = key<C>();
         utils_module::assert_owner(owner_addr);
-        let oracle_ref = simple_map::borrow_mut(&mut borrow_global_mut<Storage>(owner_addr).oracles, &key<WETH>());
+        assert!(exists<Storage>(owner_addr), error::invalid_argument(ENOT_INITIALIZED));
+        assert!(is_registered(key), error::invalid_argument(ENOT_REGISTERED));
+        let oracle_ref = simple_map::borrow_mut(&mut borrow_global_mut<Storage>(owner_addr).oracles, &key);
         oracle_ref.mode = new_mode;
     }
 
     public entry fun update_fixed_price<C>(owner: &signer, value: u128, dec: u8, neg: bool) acquires Storage {
         let owner_addr = signer::address_of(owner);
+        let key = key<C>();
         utils_module::assert_owner(owner_addr);
-        let oracle_ref = simple_map::borrow_mut(&mut borrow_global_mut<Storage>(owner_addr).oracles, &key<WETH>());
+        assert!(exists<Storage>(owner_addr), error::invalid_argument(ENOT_INITIALIZED));
+        assert!(is_registered(key), error::invalid_argument(ENOT_REGISTERED));
+        let oracle_ref = simple_map::borrow_mut(&mut borrow_global_mut<Storage>(owner_addr).oracles, &key);
         oracle_ref.fixed_price = PriceDecimal { value, dec, neg };
     }
 
