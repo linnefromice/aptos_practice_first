@@ -1,6 +1,7 @@
 #[test_only]
 module use_oracle::integration {
     use std::signer;
+    use aptos_framework::account;
     use switchboard::aggregator;
     use switchboard::math;
     use use_oracle::price_oracle;
@@ -13,6 +14,7 @@ module use_oracle::integration {
     }
     #[test(owner = @use_oracle, weth_aggr = @0x111AAA)]
     fun test_use_switchboard_from_price_oracle_mod(owner: &signer, weth_aggr: &signer) {
+        account::create_account_for_test(signer::address_of(owner));
         initialize_all(owner);
         price_oracle::add_oracle_without_fixed_price<WETH>(owner);
         price_oracle::change_mode<WETH>(owner, 2);
