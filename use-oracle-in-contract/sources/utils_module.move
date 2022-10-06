@@ -22,5 +22,7 @@ module use_oracle::utils_module {
     }
 
     #[test_only]
+    struct USDC {}
+    #[test_only]
     struct WETH {}
 }
