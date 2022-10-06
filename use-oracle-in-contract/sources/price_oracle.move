@@ -103,6 +103,12 @@ module use_oracle::price_oracle {
         initialize(account);
     }
     #[test(owner = @use_oracle)]
+    #[expected_failure(abort_code = 65538)]
+    fun test_initialize_twice(owner: &signer) {
+        initialize(owner);
+        initialize(owner);
+    }
+    #[test(owner = @use_oracle)]
     fun test_add_oracle_without_fixed_price(owner: &signer) acquires Storage {
         initialize(owner);
         add_oracle_without_fixed_price<WETH>(owner);
@@ -110,6 +116,23 @@ module use_oracle::price_oracle {
         assert!(oracle.mode == 0, 0);
         assert!(oracle.is_enabled_fixed_price == false, 0);
         assert!(oracle.fixed_price == PriceDecimal { value: 0, dec: 0, neg: false }, 0);
+    }
+    #[test(account = @0x1)]
+    #[expected_failure(abort_code = 65537)]
+    fun test_add_oracle_without_fixed_price_with_not_owner(account: &signer) acquires Storage {
+        add_oracle_without_fixed_price<WETH>(account);
+    }
+    #[test(owner = @use_oracle)]
+    #[expected_failure(abort_code = 65537)]
+    fun test_add_oracle_without_fixed_price_before_initialize(owner: &signer) acquires Storage {
+        add_oracle_without_fixed_price<WETH>(owner);
+    }
+    #[test(owner = @use_oracle)]
+    #[expected_failure(abort_code = 65540)]
+    fun test_add_oracle_without_fixed_price_twice(owner: &signer) acquires Storage {
+        initialize(owner);
+        add_oracle_without_fixed_price<WETH>(owner);
+        add_oracle_without_fixed_price<WETH>(owner);
     }
     #[test(owner = @use_oracle)]
     fun test_add_oracle_with_fixed_price(owner: &signer) acquires Storage {
@@ -119,6 +142,23 @@ module use_oracle::price_oracle {
         assert!(oracle.mode == 0, 0);
         assert!(oracle.is_enabled_fixed_price == true, 0);
         assert!(oracle.fixed_price == PriceDecimal { value: 100, dec: 9, neg: false }, 0);
+    }
+    #[test(account = @0x1)]
+    #[expected_failure(abort_code = 65537)]
+    fun test_add_oracle_with_fixed_price_with_not_owner(account: &signer) acquires Storage {
+        add_oracle_with_fixed_price<WETH>(account, 100, 9, false);
+    }
+    #[test(owner = @use_oracle)]
+    #[expected_failure(abort_code = 65537)]
+    fun test_add_oracle_with_fixed_price_before_initialize(owner: &signer) acquires Storage {
+        add_oracle_with_fixed_price<WETH>(owner, 100, 9, false);
+    }
+    #[test(owner = @use_oracle)]
+    #[expected_failure(abort_code = 65540)]
+    fun test_add_oracle_with_fixed_price_twice(owner: &signer) acquires Storage {
+        initialize(owner);
+        add_oracle_with_fixed_price<WETH>(owner, 100, 9, false);
+        add_oracle_with_fixed_price<WETH>(owner, 100, 9, false);
     }
 
     #[test(owner = @use_oracle)]
@@ -136,6 +176,17 @@ module use_oracle::price_oracle {
         change_mode<WETH>(account, 9);
     }
     #[test(owner = @use_oracle)]
+    #[expected_failure(abort_code = 65537)]
+    fun test_change_mode_before_initialize(owner: &signer) acquires Storage {
+        change_mode<WETH>(owner, 9);
+    }
+    #[test(owner = @use_oracle)]
+    #[expected_failure(abort_code = 65539)]
+    fun test_change_mode_before_register_oracle(owner: &signer) acquires Storage {
+        initialize(owner);
+        change_mode<WETH>(owner, 9);
+    }
+    #[test(owner = @use_oracle)]
     fun test_update_fixed_price(owner: &signer) acquires Storage {
         initialize(owner);
         add_oracle_without_fixed_price<WETH>(owner);
@@ -148,6 +199,17 @@ module use_oracle::price_oracle {
     #[expected_failure(abort_code = 65537)]
     fun test_update_fixed_price_with_not_owner(account: &signer) acquires Storage {
         update_fixed_price<WETH>(account, 1, 1, false);
+    }
+    #[test(owner = @use_oracle)]
+    #[expected_failure(abort_code = 65537)]
+    fun test_update_fixed_price_before_initialize(owner: &signer) acquires Storage {
+        update_fixed_price<WETH>(owner, 100, 9, false);
+    }
+    #[test(owner = @use_oracle)]
+    #[expected_failure(abort_code = 65539)]
+    fun test_update_fixed_price_before_register_oracle(owner: &signer) acquires Storage {
+        initialize(owner);
+        update_fixed_price<WETH>(owner, 100, 9, false);
     }
 
     #[test]
