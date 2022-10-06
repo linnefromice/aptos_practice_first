@@ -112,7 +112,7 @@ module use_oracle::price_oracle {
         assert!(is_registered(key), error::invalid_argument(ENOT_REGISTERED));
         let oracle = simple_map::borrow(&borrow_global<Storage>(utils_module::owner_address()).oracles, &key);
         if (oracle.mode == FIXED_PRICE) return (oracle.fixed_price.value, oracle.fixed_price.dec);
-        // if (oracle.mode == SWITCHBOARD) (0, 0) // TODO
+        if (oracle.mode == SWITCHBOARD) return use_oracle::switchboard_adaptor::price_of(&key);
         abort error::invalid_argument(EINACTIVE)
     }
 
