@@ -67,6 +67,8 @@ module use_oracle::switchboard_adaptor {
         let (value, dec) = price_internal(*name);
         (value, dec)
     }
+    // public fun volume<C>(amount: u128): u128
+    // public fun volume_of(name: &String, amount: u128): u128
 
     #[test_only]
     use std::vector;
