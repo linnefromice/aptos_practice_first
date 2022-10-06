@@ -20,6 +20,9 @@ module use_oracle::price_oracle {
     }
     struct PriceDecimal has copy, drop, store { value: u128, dec: u8, neg: bool }
 
+    ////////////////////////////////////////////////////
+    /// Manage module
+    ////////////////////////////////////////////////////
     public entry fun initialize(owner: &signer) {
         utils_module::assert_owner(signer::address_of(owner));
         move_to(owner, Storage { oracles: simple_map::create<String, OracleContainer>() });
@@ -32,7 +35,6 @@ module use_oracle::price_oracle {
             fixed_price: PriceDecimal { value: 0, dec: 0, neg: false }
         });
     }
-
     public entry fun add_oracle_with_fixed_price<C>(account: &signer, value: u128, dec: u8, neg: bool) acquires Storage {
         add_oracle(account, key<C>(), OracleContainer {
             mode: INACTIVE,
@@ -40,12 +42,25 @@ module use_oracle::price_oracle {
             fixed_price: PriceDecimal { value, dec, neg }
         });
     }
-
     fun add_oracle(owner: &signer, key: String, oracle: OracleContainer) acquires Storage {
         let owner_addr = signer::address_of(owner);
         utils_module::assert_owner(owner_addr);
         let storage = borrow_global_mut<Storage>(owner_addr);
         simple_map::add<String, OracleContainer>(&mut storage.oracles, key, oracle);
+    }
+
+    public entry fun change_mode<C>(owner: &signer, new_mode: u8) acquires Storage {
+        let owner_addr = signer::address_of(owner);
+        utils_module::assert_owner(owner_addr);
+        let oracle_ref = simple_map::borrow_mut(&mut borrow_global_mut<Storage>(owner_addr).oracles, &key<WETH>());
+        oracle_ref.mode = new_mode;
+    }
+
+    public entry fun update_fixed_price<C>(owner: &signer, value: u128, dec: u8, neg: bool) acquires Storage {
+        let owner_addr = signer::address_of(owner);
+        utils_module::assert_owner(owner_addr);
+        let oracle_ref = simple_map::borrow_mut(&mut borrow_global_mut<Storage>(owner_addr).oracles, &key<WETH>());
+        oracle_ref.fixed_price = PriceDecimal { value, dec, neg };
     }
 
     #[test_only]
@@ -82,7 +97,36 @@ module use_oracle::price_oracle {
         assert!(oracle.is_enabled_fixed_price == true, 0);
         assert!(oracle.fixed_price == PriceDecimal { value: 100, dec: 9, neg: false }, 0);
     }
-    
+
+    #[test(owner = @use_oracle)]
+    fun test_change_mode(owner: &signer) acquires Storage {
+        initialize(owner);
+        add_oracle_without_fixed_price<WETH>(owner);
+        change_mode<WETH>(owner, 9);
+
+        let oracle = simple_map::borrow(&borrow_global<Storage>(signer::address_of(owner)).oracles, &key<WETH>());
+        assert!(oracle.mode == 9, 0);
+    }
+    #[test(account = @0x1)]
+    #[expected_failure(abort_code = 65537)]
+    fun test_change_mode_with_not_owner(account: &signer) acquires Storage {
+        change_mode<WETH>(account, 9);
+    }
+    #[test(owner = @use_oracle)]
+    fun test_update_fixed_price(owner: &signer) acquires Storage {
+        initialize(owner);
+        add_oracle_without_fixed_price<WETH>(owner);
+        update_fixed_price<WETH>(owner, 1, 1, false);
+
+        let oracle = simple_map::borrow(&borrow_global<Storage>(signer::address_of(owner)).oracles, &key<WETH>());
+        assert!(oracle.fixed_price == PriceDecimal { value: 1, dec: 1, neg: false }, 0);
+    }
+    #[test(account = @0x1)]
+    #[expected_failure(abort_code = 65537)]
+    fun test_update_fixed_price_with_not_owner(account: &signer) acquires Storage {
+        update_fixed_price<WETH>(account, 1, 1, false);
+    }
+
     #[test]
     fun test_aggregator() {
         let signers = unit_test::create_signers_for_testing(1);
