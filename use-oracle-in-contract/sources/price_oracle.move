@@ -87,6 +87,19 @@ module use_oracle::price_oracle {
         oracle_ref.fixed_price = PriceDecimal { value, dec, neg };
     }
 
+    ////////////////////////////////////////////////////
+    /// View function
+    ////////////////////////////////////////////////////
+    public fun fixed_price_mode(): u8 {
+        FIXED_PRICE
+    }
+    public fun mode<C>(): u8 acquires Storage {
+        mode_internal(key<C>())
+    }
+    fun mode_internal(key: String): u8 acquires Storage {
+        let oracle_ref = simple_map::borrow(&borrow_global<Storage>(utils_module::owner_address()).oracles, &key);
+        oracle_ref.mode
+    }
 
     ////////////////////////////////////////////////////
     /// Feed
@@ -229,6 +242,30 @@ module use_oracle::price_oracle {
     fun test_update_fixed_price_before_register_oracle(owner: &signer) acquires Storage {
         initialize(owner);
         update_fixed_price<WETH>(owner, 100, 9, false);
+    }
+
+    #[test(owner = @use_oracle)]
+    fun test_price_when_using_fixed_value(owner: &signer) acquires Storage {
+        initialize(owner);
+        add_oracle_with_fixed_price<WETH>(owner, 100, 9, false);
+        change_mode<WETH>(owner, fixed_price_mode());
+        assert!(mode<WETH>() == FIXED_PRICE, 0);
+
+        let (val, dec) = price<WETH>();
+        assert!(val == 100, 0);
+        assert!(dec == 9, 0);
+        let (val, dec) = price_of(key<WETH>());
+        assert!(val == 100, 0);
+        assert!(dec == 9, 0);
+
+        update_fixed_price<WETH>(owner, 50000, 1, false);
+
+        let (val, dec) = price<WETH>();
+        assert!(val == 50000, 0);
+        assert!(dec == 1, 0);
+        let (val, dec) = price_of(key<WETH>());
+        assert!(val == 50000, 0);
+        assert!(dec == 1, 0);
     }
 
     #[test]
