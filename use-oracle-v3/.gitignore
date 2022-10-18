@@ -149,3 +149,4 @@ dist
 
 # original
 /build
+/temp/*.log
