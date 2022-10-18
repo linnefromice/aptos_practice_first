@@ -1,6 +1,8 @@
-import { createFeed } from "@switchboard-xyz/aptos.js";
-import { AptosClient, FaucetClient, AptosAccount } from "aptos";
+import * as fs from "fs";
+import * as YAML from "yaml";
 import Big from "big.js";
+import { AptosClient, FaucetClient, AptosAccount, HexString } from "aptos";
+import { createFeed } from "@switchboard-xyz/aptos.js";
 import { usdcJobs } from "./jobs/usdc";
 import { NODE_URL, FAUCET_URL, SWITCHBOARD_ADDRESS } from "./utils/env";
 
@@ -8,8 +10,12 @@ import { NODE_URL, FAUCET_URL, SWITCHBOARD_ADDRESS } from "./utils/env";
   const client = new AptosClient(NODE_URL);
   const faucetClient = new FaucetClient(NODE_URL, FAUCET_URL);
 
-  const user = new AptosAccount(); // temp: use from .aptos/config
-  await faucetClient.fundAccount(user.address(), 50000000);
+  const parsedYaml = YAML.parse(
+    fs.readFileSync(".aptos/config.yaml", "utf8")
+  )
+  const user = new AptosAccount(
+    HexString.ensure(parsedYaml.profiles.default.private_key).toUint8Array()
+  );
   const aggregator_acct = new AptosAccount();
   await faucetClient.fundAccount(aggregator_acct.address(), 50000);
   console.log(`user: ${user.address()}`)
