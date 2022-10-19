@@ -32,6 +32,42 @@ module u256_v1::calculator {
     }
 
     #[test]
+    fun test_volume_with_u256() {
+        let price = Price {
+            value: 1298 * math128::pow(10, 9),
+            dec: 9
+        };
+        let result = volume_with_u256(math128::pow(10, 34), price);
+        assert!(result == 1298 * math128::pow(10, 34), 0);
+    }
+    #[test]
+    #[expected_failure] // ARITHMETIC_ERROR
+    fun test_volume() {
+        let price = Price {
+            value: 1298 * math128::pow(10, 9),
+            dec: 9
+        };
+        volume(math128::pow(10, 34), price);
+    }
+    #[test]
+    fun test_to_amount_with_u256() {
+        let price = Price {
+            value: 5 * math128::pow(10, 8),
+            dec: 9
+        }; // 0.5
+        let result = to_amount_with_u256(math128::pow(10, 34), price);
+        assert!(result == 2 * math128::pow(10, 34), 0);
+    }
+    #[test]
+    #[expected_failure] // ARITHMETIC_ERROR
+    fun test_to_amount() {
+        let price = Price {
+            value: 5 * math128::pow(10, 7), // 0.05
+            dec: 9
+        };
+        to_amount(math128::pow(10, 34), price);
+    }
+    #[test]
     fun test_sample() {
         assert!(1 == 1, 0);
     }

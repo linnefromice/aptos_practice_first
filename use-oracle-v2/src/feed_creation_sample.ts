@@ -19,7 +19,7 @@ const FAUCET_URL = parsed["FAUCET_URL"];
 
   // create new user
   let user = new AptosAccount();
-  await faucetClient.fundAccount(user.address(), 500000);
+  await faucetClient.fundAccount(user.address(), 50000000);
   console.log(`User account ${user.address().hex()} created + funded.`);
 
   await generateAggregatorWithJob({
