@@ -15,3 +15,12 @@ export const currentRound = async (client: AptosClient, address: string) => {
 
   return resource
 }
+
+export const latestConfirmedRound = async (client: AptosClient, address: string) => {
+  const resource = await client.getAccountResource(
+    address,
+    `${SWITCHBOARD_ADDRESS}::${resources.aggregatorRound}<${SWITCHBOARD_ADDRESS}::${resources.latestConfirmedRound}>`,
+  )
+
+  return resource
+}

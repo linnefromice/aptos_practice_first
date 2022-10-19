@@ -10,9 +10,11 @@ if (!parsed) throw new Error("[ERROR] donot parse from dotenv")
 const NODE_URL = parsed["NODE_URL"];
 const FAUCET_URL = parsed["FAUCET_URL"];
 const SWITCHBOARD_ADDRESS = parsed["SWITCHBOARD_ADDRESS"];
+const AGGREGATOR_ADDRESS = parsed["AGGREGATOR_ADDRESS"];
 
 export {
   NODE_URL,
   FAUCET_URL,
-  SWITCHBOARD_ADDRESS
+  SWITCHBOARD_ADDRESS,
+  AGGREGATOR_ADDRESS
 }
