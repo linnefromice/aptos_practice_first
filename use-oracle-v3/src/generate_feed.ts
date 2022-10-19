@@ -1,27 +1,57 @@
 import * as fs from "fs";
 import * as YAML from "yaml";
 import Big from "big.js";
-import { AptosClient, FaucetClient, AptosAccount, HexString } from "aptos";
+import { AptosClient, AptosAccount, HexString } from "aptos";
 import { createFeed } from "@switchboard-xyz/aptos.js";
-import { usdcJobs } from "./jobs/usdc";
-import { NODE_URL, FAUCET_URL, SWITCHBOARD_ADDRESS } from "./utils/env";
+// import { usdcJobs } from "./jobs/usdc";
+import { ethJobs } from "./jobs/eth";
+import { NODE_URL, SWITCHBOARD_ADDRESS } from "./utils/env";
 
-(async () => {
-  const client = new AptosClient(NODE_URL);
-  const faucetClient = new FaucetClient(NODE_URL, FAUCET_URL);
+const getAccounts = async (): Promise<{
+  user: AptosAccount
+  // aggregator_account: AptosAccount
+}> => {
+  const envName = process.env.ENV_NAME
+  if (!envName) throw new Error("[ERROR] Need ENV_NAME")
 
   const parsedYaml = YAML.parse(
     fs.readFileSync(".aptos/config.yaml", "utf8")
   )
-  const user = new AptosAccount(
-    HexString.ensure(parsedYaml.profiles.default.private_key).toUint8Array()
-  );
-  const aggregator_acct = new AptosAccount();
-  await faucetClient.fundAccount(aggregator_acct.address(), 50000);
-  console.log(`user: ${user.address()}`)
-  console.log(`aggregator_account: ${aggregator_acct.address()}`)
+  if (envName == "devnet") {
+    const user = new AptosAccount(
+      HexString.ensure(parsedYaml.profiles.default.private_key).toUint8Array()
+    );
+    // const aggregator_account = new AptosAccount();
+    // const faucetClient = new FaucetClient(NODE_URL, FAUCET_URL);
+    // await faucetClient.fundAccount(aggregator_account.address(), 5000000);
 
-  const serializedJob = usdcJobs.binance // temp
+    return {
+      user,
+      // aggregator_account
+    }
+  }
+  if (envName == "testnet") {
+    const user = new AptosAccount(
+      HexString.ensure(parsedYaml.profiles.testnet.private_key).toUint8Array()
+    );
+    // const aggregator_account = new AptosAccount(
+    //   HexString.ensure(parsedYaml.profiles.usdc_testnet.private_key).toUint8Array()
+    // );
+    return {
+      user,
+      // aggregator_account
+    }
+  }
+  throw new Error("No applicable envName")
+}
+
+(async () => {
+  const client = new AptosClient(NODE_URL);
+  const { user } = await getAccounts()
+  console.log(`user: ${user.address()}`)
+  // console.log(`aggregator_account: ${aggregator_account.address()}`)
+
+  const serializedJob = ethJobs.binance // temp
   const [aggregator, createFeedTx] = await createFeed(
     client,
     user,
@@ -38,7 +68,7 @@ import { NODE_URL, FAUCET_URL, SWITCHBOARD_ADDRESS } from "./utils/env";
       initialLoadAmount: 1000,
       jobs: [
         {
-          name: "USDC/USD",
+          name: "ETH/USD",
           metadata: "binance",
           authority: user.address().hex(),
           data: serializedJob.toString("base64"),
