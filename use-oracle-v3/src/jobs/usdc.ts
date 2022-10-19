@@ -6,19 +6,14 @@ const binance = Buffer.from(
       tasks: [
         {
           httpTask: {
-            url: "https://www.binance.com/api/v3/ticker/price?symbol=USDCUSDT",
+            url: "https://www.binance.us/api/v3/ticker/price?symbol=USDCUSD",
           },
         },
         {
           jsonParseTask: {
             path: "$.price",
           },
-        },
-        {
-          multiplyTask: {
-            aggregatorPubkey: "ETAaeeuQBwsh9mC2gCov9WdhJENZuffRMXY2HgjCcSL9",
-          },
-        },
+        }
       ],
     })
   ).finish()
