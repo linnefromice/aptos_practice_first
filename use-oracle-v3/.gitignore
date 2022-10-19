@@ -150,4 +150,5 @@ dist
 # original
 /build
 /temp/*.log
+/outputs/*.json
 .aptos

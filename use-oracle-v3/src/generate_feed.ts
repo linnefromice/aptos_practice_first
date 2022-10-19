@@ -1,7 +1,8 @@
 import * as fs from "fs";
 import * as YAML from "yaml";
+import jsonfile from "jsonfile";
 import Big from "big.js";
-import { AptosClient, AptosAccount, HexString } from "aptos";
+import { AptosClient, AptosAccount, CoinClient, HexString } from "aptos";
 import { createFeed } from "@switchboard-xyz/aptos.js";
 // import { usdcJobs } from "./jobs/usdc";
 import { ethJobs } from "./jobs/eth";
@@ -51,6 +52,8 @@ const getAccounts = async (): Promise<{
   console.log(`user: ${user.address()}`)
   // console.log(`aggregator_account: ${aggregator_account.address()}`)
 
+  const name = "ETH/USD"
+  const metadata = "binance"
   const serializedJob = ethJobs.binance // temp
   const [aggregator, createFeedTx] = await createFeed(
     client,
@@ -68,8 +71,8 @@ const getAccounts = async (): Promise<{
       initialLoadAmount: 1000,
       jobs: [
         {
-          name: "ETH/USD",
-          metadata: "binance",
+          name,
+          metadata,
           authority: user.address().hex(),
           data: serializedJob.toString("base64"),
           weight: 1,
@@ -82,4 +85,24 @@ const getAccounts = async (): Promise<{
   console.log(`aggregator.address: ${aggregator.address}`)
   console.log(`tx.hash: ${createFeedTx}`);
   console.log(`(Created Aggregator and Lease resources at account address)`)
+  const balance = await new CoinClient(client).checkBalance(user)
+  console.log(`user's balance: ${(balance.toString())}`)
+
+  // logging
+  const filepath = `outputs/feeds-${process.env.ENV_NAME}.json`
+  if (!fs.existsSync(filepath)) {
+    fs.writeFileSync(filepath, JSON.stringify([]));
+  }
+  const base = (jsonfile.readFileSync(filepath) as any[]);
+  base.push({
+    name,
+    metadata,
+    addresses: {
+      user: user.address().toString(),
+      aggregator: aggregator.address
+    },
+    tx: createFeedTx,
+    datetime: new Date().toISOString()
+  })
+  fs.writeFileSync(filepath, JSON.stringify(base, null, 2));
 })();
