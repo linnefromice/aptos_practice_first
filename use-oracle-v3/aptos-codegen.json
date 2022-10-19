@@ -1,0 +1,19 @@
+{
+  "nodeUrl": "https://fullnode.devnet.aptoslabs.com/v1",
+  "outDir": "src/libs/modules/__generated__",
+  "modules": [
+    "switchboard::switchboard",
+    "switchboard::crank",
+    "switchboard::oracle_queue",
+    "switchboard::aggregator",
+    "switchboard::escrow"
+  ],
+  "aliases": {
+    "0x34e2eead0aefbc3d0af13c0522be94b002658f4bef8e0740a21086d22236ad77": "switchboard"
+  },
+  "minifyAbi": true,
+  "targets": {
+    "entryFunctions": true,
+    "utilities": true
+  }
+}
