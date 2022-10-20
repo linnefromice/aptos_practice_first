@@ -32,8 +32,9 @@ module use_oracle::price_oracle {
         type_info::type_name<C>()
     }
 
-    public entry fun add_aggregator<C>(aggregator: address) acquires Storage {
+    public entry fun add_aggregator<C>(owner: &signer, aggregator: address) acquires Storage {
         let owner_addr = owner();
+        assert!(signer::address_of(owner) == owner_addr, 0);
         let key = key<C>();
         assert!(exists<Storage>(owner_addr), 0);
         assert!(!is_registered(key), 0);
@@ -60,6 +61,9 @@ module use_oracle::price_oracle {
         let aggrs = &borrow_global<Storage>(owner_addr).aggregators;
         let aggregator_addr = simple_map::borrow<String, address>(aggrs, &key);
         price_from_aggregator(*aggregator_addr)
+    }
+    public fun price<C>(): (u128, u8) acquires Storage {
+        price_internal(key<C>())
     }
     public fun volume<C>(amount: u128): u128 acquires Storage {
         let (value, dec) = price_internal(key<C>());
@@ -96,5 +100,27 @@ module use_oracle::price_oracle {
         assert!(val == 100 * math128::pow_10((dec as u128)), 0);
         assert!(dec == 9, 0);
         assert!(is_neg == false, 0);
+    }
+    #[test(owner = @use_oracle, aptos_framework = @aptos_framework, eth_aggr = @0x111AAA, usdc_aggr = @0x222AAA)]
+    fun test_price(owner: &signer, aptos_framework: &signer, eth_aggr: &signer, usdc_aggr: &signer) acquires Storage {
+        account::create_account_for_test(signer::address_of(aptos_framework));
+        block::initialize_for_test(aptos_framework, 1);
+        timestamp::set_time_has_started_for_testing(aptos_framework);
+
+        account::create_account_for_test(signer::address_of(owner));
+        initialize(owner);
+
+        aggregator::new_test(eth_aggr, 1300, 0, false);
+        aggregator::new_test(usdc_aggr, 99, 2, false);
+        add_aggregator<ETH>(owner, signer::address_of(eth_aggr));
+        add_aggregator<USDC>(owner, signer::address_of(usdc_aggr));
+
+        let (val, dec) = price<ETH>();
+        assert!(val == 1300000000000, 0);
+        assert!(dec == 9, 0);
+
+        let (val, dec) = price<USDC>();
+        assert!(val == 990000000, 0);
+        assert!(dec == 9, 0);
     }
 }
