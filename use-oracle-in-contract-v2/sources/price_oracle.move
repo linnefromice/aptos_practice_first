@@ -92,10 +92,17 @@ module use_oracle::price_oracle {
         let result = simple_map::borrow(results, &key<C>());
         (result.value, result.dec)
     }
-    public entry fun price<C>(_account: &signer): (u128, u8) acquires Storage {
+    public fun cached_price_entry<C>(account: &signer) acquires Storage {
+        cached_price<C>(account);
+    }
+    public fun price<C>(_account: &signer): (u128, u8) acquires Storage {
         price_internal(key<C>())
     }
-    public entry fun volume<C>(account: &signer, amount: u128): u128 acquires Storage, Volume {
+    public entry fun price_entry<C>(account: &signer) acquires Storage {
+        price<C>(account);
+    }
+    
+    public entry fun volume<C>(account: &signer, amount: u128) acquires Storage, Volume {
         let (value, dec) = price_internal(key<C>());
         let numerator = amount * value;
         let result = numerator / math128::pow_10((dec as u128));
@@ -113,9 +120,8 @@ module use_oracle::price_oracle {
         } else {
             move_to(account, result_res);
         };
-        result
     }
-    public entry fun to_amount<C>(account: &signer, volume: u128): u128 acquires Storage, Amount {
+    public entry fun to_amount<C>(account: &signer, volume: u128) acquires Storage, Amount {
         let (value, dec) = price_internal(key<C>());
         let numerator = volume * math128::pow_10((dec as u128));
         let result = numerator / value;
@@ -133,7 +139,6 @@ module use_oracle::price_oracle {
         } else {
             move_to(account, result_res);
         };
-        result
     }
 
     #[test_only]
@@ -175,17 +180,17 @@ module use_oracle::price_oracle {
         add_aggregator<ETH>(owner, signer::address_of(eth_aggr));
         add_aggregator<USDC>(owner, signer::address_of(usdc_aggr));
 
-        let (val, dec) = price<ETH>();
+        let (val, dec) = price<ETH>(owner);
         assert!(val == math128::pow_10(9) * 1300, 0);
         assert!(dec == 9, 0);
-        let (val, dec) = cached_price<ETH>();
+        let (val, dec) = cached_price<ETH>(owner);
         assert!(val == math128::pow_10(9) * 1300, 0);
         assert!(dec == 9, 0);
 
-        let (val, dec) = price<USDC>();
+        let (val, dec) = price<USDC>(owner);
         assert!(val == math128::pow_10(9) * 99 / 100, 0);
         assert!(dec == 9, 0);
-        let (val, dec) = cached_price<USDC>();
+        let (val, dec) = cached_price<USDC>(owner);
         assert!(val == math128::pow_10(9) * 99 / 100, 0);
         assert!(dec == 9, 0);
     }
