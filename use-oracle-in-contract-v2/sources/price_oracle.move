@@ -87,15 +87,15 @@ module use_oracle::price_oracle {
         result.dec = dec;
         (value, dec)
     }
-    public fun cached_price<C>(): (u128, u8) acquires Storage {
+    public entry fun cached_price<C>(_account: &signer): (u128, u8) acquires Storage {
         let results = &borrow_global<Storage>(owner()).results;
         let result = simple_map::borrow(results, &key<C>());
         (result.value, result.dec)
     }
-    public fun price<C>(): (u128, u8) acquires Storage {
+    public entry fun price<C>(_account: &signer): (u128, u8) acquires Storage {
         price_internal(key<C>())
     }
-    public fun volume<C>(account: &signer, amount: u128): u128 acquires Storage, Volume {
+    public entry fun volume<C>(account: &signer, amount: u128): u128 acquires Storage, Volume {
         let (value, dec) = price_internal(key<C>());
         let numerator = amount * value;
         let result = numerator / math128::pow_10((dec as u128));
@@ -115,7 +115,7 @@ module use_oracle::price_oracle {
         };
         result
     }
-    public fun to_amount<C>(account: &signer, volume: u128): u128 acquires Storage, Amount {
+    public entry fun to_amount<C>(account: &signer, volume: u128): u128 acquires Storage, Amount {
         let (value, dec) = price_internal(key<C>());
         let numerator = volume * math128::pow_10((dec as u128));
         let result = numerator / value;
