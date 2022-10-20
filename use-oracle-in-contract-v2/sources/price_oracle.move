@@ -15,8 +15,13 @@ module use_oracle::price_oracle {
     struct NEAR {}
     struct APT {}
 
+    struct Result has store {
+        value: u128,
+        decimal: u8
+    }
     struct Storage has key {
-        aggregators: simple_map::SimpleMap<String, address>
+        aggregators: simple_map::SimpleMap<String, address>,
+        results: simple_map::SimpleMap<String, Result>
     }
 
     fun owner(): address {
@@ -25,7 +30,10 @@ module use_oracle::price_oracle {
 
     public entry fun initialize(owner: &signer) {
         assert!(!exists<Storage>(signer::address_of(owner)), 0);
-        move_to(owner, Storage { aggregators: simple_map::create<String, address>() })
+        move_to(owner, Storage {
+            aggregators: simple_map::create<String, address>(),
+            results: simple_map::create<String, Result>()
+        })
     }
 
     fun key<C>(): String {
@@ -39,7 +47,9 @@ module use_oracle::price_oracle {
         assert!(exists<Storage>(owner_addr), 0);
         assert!(!is_registered(key), 0);
         let aggrs = &mut borrow_global_mut<Storage>(owner_addr).aggregators;
-        simple_map::add<String, address>(aggrs, key, aggregator);
+        simple_map::add(aggrs, key, aggregator);
+        let results = &mut borrow_global_mut<Storage>(owner_addr).results;
+        simple_map::add(results, key, Result { value: 0, decimal: 0 });
     }
     fun is_registered(key: String): bool acquires Storage {
         let storage_ref = borrow_global<Storage>(owner());
@@ -60,7 +70,17 @@ module use_oracle::price_oracle {
         assert!(is_registered(key), 0);
         let aggrs = &borrow_global<Storage>(owner_addr).aggregators;
         let aggregator_addr = simple_map::borrow<String, address>(aggrs, &key);
-        price_from_aggregator(*aggregator_addr)
+        let (value, dec) = price_from_aggregator(*aggregator_addr);
+        let results = &mut borrow_global_mut<Storage>(owner_addr).results;
+        let result = simple_map::borrow_mut(results, &key);
+        result.value = value;
+        result.decimal = dec;
+        (value, dec)
+    }
+    public fun cached_price<C>(): (u128, u8) acquires Storage {
+        let results = &borrow_global<Storage>(owner()).results;
+        let result = simple_map::borrow(results, &key<C>());
+        (result.value, result.decimal)
     }
     public fun price<C>(): (u128, u8) acquires Storage {
         price_internal(key<C>())
@@ -118,9 +138,15 @@ module use_oracle::price_oracle {
         let (val, dec) = price<ETH>();
         assert!(val == math128::pow_10(9) * 1300, 0);
         assert!(dec == 9, 0);
+        let (val, dec) = cached_price<ETH>();
+        assert!(val == math128::pow_10(9) * 1300, 0);
+        assert!(dec == 9, 0);
 
         let (val, dec) = price<USDC>();
-        assert!(val ==  math128::pow_10(9) * 99 / 100, 0);
+        assert!(val == math128::pow_10(9) * 99 / 100, 0);
+        assert!(dec == 9, 0);
+        let (val, dec) = cached_price<USDC>();
+        assert!(val == math128::pow_10(9) * 99 / 100, 0);
         assert!(dec == 9, 0);
     }
 }
