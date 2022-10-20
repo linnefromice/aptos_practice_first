@@ -1,11 +1,14 @@
 [package]
 name = 'UseOracleInContractV2'
-version = '1.0.0'
+version = '0.1.0'
+upgrade_policy = "compatible"
 
-[dependencies.AptosFramework]
-git = 'https://github.com/aptos-labs/aptos-core.git'
-rev = 'main'
-subdir = 'aptos-move/framework/aptos-framework'
+[dependencies]
+MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/move-stdlib/", rev = "devnet" }
+AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-framework/", rev = "devnet" }
+AptosStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-stdlib/", rev = "devnet" }
+Switchboard = { git = "https://github.com/switchboard-xyz/sbv2-aptos.git", subdir = "move/switchboard/", rev = "main" }
 
 [addresses]
 use_oracle="0xAAAAAAAA"
+switchboard="0xb91d3fef0eeb4e685dc85e739c7d3e2968784945be4424e92e2f86e2418bf271" # devnet and testnet
