@@ -116,11 +116,11 @@ module use_oracle::price_oracle {
         add_aggregator<USDC>(owner, signer::address_of(usdc_aggr));
 
         let (val, dec) = price<ETH>();
-        assert!(val == 1300000000000, 0);
+        assert!(val == math128::pow_10(9) * 1300, 0);
         assert!(dec == 9, 0);
 
         let (val, dec) = price<USDC>();
-        assert!(val == 990000000, 0);
+        assert!(val ==  math128::pow_10(9) * 99 / 100, 0);
         assert!(dec == 9, 0);
     }
 }
