@@ -15,13 +15,23 @@ module use_oracle::price_oracle {
     struct NEAR {}
     struct APT {}
 
-    struct Result has store {
+    struct Result has store, copy, drop {
         value: u128,
-        decimal: u8
+        dec: u8
     }
     struct Storage has key {
         aggregators: simple_map::SimpleMap<String, address>,
         results: simple_map::SimpleMap<String, Result>
+    }
+    struct Volume<phantom C> has key, drop {
+        input: u128,
+        price: Result,
+        result: u128
+    }
+    struct Amount<phantom C> has key, drop {
+        input: u128,
+        price: Result,
+        result: u128
     }
 
     fun owner(): address {
@@ -49,7 +59,7 @@ module use_oracle::price_oracle {
         let aggrs = &mut borrow_global_mut<Storage>(owner_addr).aggregators;
         simple_map::add(aggrs, key, aggregator);
         let results = &mut borrow_global_mut<Storage>(owner_addr).results;
-        simple_map::add(results, key, Result { value: 0, decimal: 0 });
+        simple_map::add(results, key, Result { value: 0, dec: 0 });
     }
     fun is_registered(key: String): bool acquires Storage {
         let storage_ref = borrow_global<Storage>(owner());
@@ -74,26 +84,56 @@ module use_oracle::price_oracle {
         let results = &mut borrow_global_mut<Storage>(owner_addr).results;
         let result = simple_map::borrow_mut(results, &key);
         result.value = value;
-        result.decimal = dec;
+        result.dec = dec;
         (value, dec)
     }
     public fun cached_price<C>(): (u128, u8) acquires Storage {
         let results = &borrow_global<Storage>(owner()).results;
         let result = simple_map::borrow(results, &key<C>());
-        (result.value, result.decimal)
+        (result.value, result.dec)
     }
     public fun price<C>(): (u128, u8) acquires Storage {
         price_internal(key<C>())
     }
-    public fun volume<C>(amount: u128): u128 acquires Storage {
+    public fun volume<C>(account: &signer, amount: u128): u128 acquires Storage, Volume {
         let (value, dec) = price_internal(key<C>());
         let numerator = amount * value;
-        numerator / math128::pow_10((dec as u128))
+        let result = numerator / math128::pow_10((dec as u128));
+        let account_addr = signer::address_of(account);
+        let result_res = Volume<C> {
+            input: amount,
+            price: Result { value, dec },
+            result: copy result,
+        };
+        if (exists<Volume<C>>(account_addr)) {
+            let res = borrow_global_mut<Volume<C>>(account_addr);
+            res.input = result_res.input;
+            res.price = result_res.price;
+            res.result = result_res.result;
+        } else {
+            move_to(account, result_res);
+        };
+        result
     }
-    public fun to_amount<C>(volume: u128): u128 acquires Storage {
+    public fun to_amount<C>(account: &signer, volume: u128): u128 acquires Storage, Amount {
         let (value, dec) = price_internal(key<C>());
         let numerator = volume * math128::pow_10((dec as u128));
-        numerator / value
+        let result = numerator / value;
+        let account_addr = signer::address_of(account);
+        let result_res = Amount<C> {
+            input: volume,
+            price: Result { value, dec },
+            result: copy result,
+        };
+        if (exists<Amount<C>>(account_addr)) {
+            let res = borrow_global_mut<Amount<C>>(account_addr);
+            res.input = result_res.input;
+            res.price = result_res.price;
+            res.result = result_res.result;
+        } else {
+            move_to(account, result_res);
+        };
+        result
     }
 
     #[test_only]
