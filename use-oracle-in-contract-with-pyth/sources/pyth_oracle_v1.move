@@ -94,11 +94,11 @@ module use_oracle::pyth_oracle_v1 {
         );
         (price, expo)
     }
-    public fun price<C>(): (u64, u64) acquires Storage, PythOracleEventHandle {
+    public entry fun price<C>(): (u64, u64) acquires Storage, PythOracleEventHandle {
         let (value, dec) = price_internal(key<C>());
         (value, dec)
     }
-    public fun price_of(name: &String): (u64, u64) acquires Storage, PythOracleEventHandle {
+    public entry fun price_of(name: &String): (u64, u64) acquires Storage, PythOracleEventHandle {
         let (value, dec) = price_internal(*name);
         (value, dec)
     }
