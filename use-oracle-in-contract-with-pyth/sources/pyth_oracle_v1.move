@@ -102,4 +102,10 @@ module use_oracle::pyth_oracle_v1 {
         let (value, dec) = price_internal(*name);
         (value, dec)
     }
+    public entry fun price_entry<C>() acquires Storage, PythOracleEventHandle {
+        price_internal(key<C>());
+    }
+    public entry fun price_of_entry(name: &String) acquires Storage, PythOracleEventHandle {
+        price_internal(*name);
+    }
 }
