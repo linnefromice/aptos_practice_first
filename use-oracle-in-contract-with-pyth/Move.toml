@@ -14,8 +14,8 @@ rev = 'main'
 subdir = 'aptos/contracts/'
 
 [addresses]
-use_oracle="0xAAAAAAAA"
+use_oracle="0x0e8cf7d182a4bf03da1f8ef2ad21efb462cb5c10b285da3ba7d2029b18080343"
 aptos_framework = "0x1"
-pyth = "0xe2f37b8ac45d29d5ea23eb7d16dd3f7a7ab6426f5a998d6c23ecd3ae8d9d29eb"
-wormhole = "0x251011524cd0f76881f16e7c2d822f0c1c9510bfd2430ba24e1b3d52796df204"
-deployer = "0x277fa055b6a73c42c0662d5236c65c864ccbf2d4abd21f174a30c8b786eab84b"
+pyth = "0x7e783b349d3e89cf5931af376ebeadbfab855b3fa239b7ada8f5a92fbea6b387"
+wormhole = "0x5bc11445584a763c1fa7ed39081f1b920954da14e04b32440cba863d03e19625"
+deployer = "0xb31e712b26fd295357355f6845e77c888298636609e93bc9b05f0f604049f434"
